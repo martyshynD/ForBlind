@@ -1,3 +1,5 @@
+
+
 // * ---------------------    --------------------
 // * | HC-SC04 | Arduino |    | 3 pins | Arduino |
 // * ---------------------    --------------------
@@ -17,9 +19,9 @@ Ultrasonic ultrasonic(12, 13);
 int distance;
 
 /// for driver
-int pwm = 7;
-int ain2 = 8;
-int ain1 = 9;
+int pwm = 3;
+int ain2 = 5;
+int ain1 = 6;
 float i;
 
 void setup() {
@@ -33,7 +35,7 @@ void loop() {
   distance = ultrasonic.read();
   
   // Цикл, який виводить повідомлення "No!", коли відстань більше 30 см
-  while (distance > 50) {
+  while (distance > 100) {
       Serial.println("Too far!");
       delay(300);
       digitalWrite(ain1, 0);
@@ -46,7 +48,7 @@ void loop() {
 //  delay(100);
 
   // Обчислюємо i, щоб вона зменшувалася з відстанню
-  i = 255 - (distance * 5.1); // коригуємо коефіцієнт 8.5 за необхідності
+  i = 255 - (distance * 2.1); // коригуємо коефіцієнт 8.5 за необхідності
 
   // Обмежуємо значення i в межах 0-255
   i = constrain(i, 0, 255);
