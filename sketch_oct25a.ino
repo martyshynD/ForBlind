@@ -10,7 +10,7 @@
 // * ---------------------
 
 
-// driver - TB6612
+// driver - TB6612FNG
 
 
 /// ultrasonic
