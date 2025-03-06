@@ -33,13 +33,13 @@ float i;
 void opticfunc(){
   noTone(pin_buz);
   sensor.read();
-  if (sensor.ranging_data.range_mm >= 1200) {
+  if (sensor.ranging_data.range_mm >= 1600) {
     analogWrite(pwm, 0);
     digitalWrite(ain1, 0);
     digitalWrite(ain2, 0);
   }
   else {
-    i = map(sensor.ranging_data.range_mm, 1200, 0, 0, 255);
+    i = map(sensor.ranging_data.range_mm, 1600, 0, 0, 255);
     analogWrite(pwm, i);
     digitalWrite(ain2, LOW);
     digitalWrite(ain1, HIGH);  
