@@ -3,6 +3,9 @@
 // Помічник, науковий керівник: Андрій Мишопита
 
 #include <Arduino.h>
+
+bool alreadyBuzzed = false;
+
 #define HC_TRIG 12
 #define HC_ECHO 13
 
@@ -29,6 +32,7 @@ int ain1 = 6;
 // значення поданої напруги на вібромоторчик (за принципом ШИМ) 
 float value_pwm;
 
+
 float sonarfunc() {
   digitalWrite(HC_TRIG, HIGH);
   delayMicroseconds(10);
@@ -36,6 +40,7 @@ float sonarfunc() {
   uint32_t us = pulseIn(HC_ECHO, HIGH);
   return (us / 5.82);
 }
+
 
 bool threshhold_arr(float arr[], int len, float average, float diff){ // повертаємо одиничку якщо різниця між середнім та будь якою ячейкою масиву більша за поріг
   for (int i = 0; i < len; i++)
@@ -54,12 +59,12 @@ void getDist() {
   average_sum -= arr[pointer];
   arr[pointer] = sensor.ranging_data.range_mm;
   average_sum += arr[pointer];
-  
+
   pointer=(pointer+1)%50; 
   average_res = average_sum/50;
 
   float rg = min(sensor.ranging_data.range_mm, sonarfunc());
-
+  
   if (threshhold_arr(arr, 50, average_res, 30)){
     digitalWrite(pin_buz, 0);
     Serial.println("threshhold_arr");
@@ -71,6 +76,7 @@ void getDist() {
     digitalWrite(ain1, 0);
     digitalWrite(ain2, 0);
     Serial.println("not threshhold_arr");
+
     return;
 
   }
@@ -89,19 +95,27 @@ void getDist() {
   }
 }
 
+
 // Функція для PIR датчика
-void pirfunc(){
-  state = digitalRead(pin); // Використовуємо глобальну змінну
-  if (state == HIGH) { 
+void pirfunc() {
+  state = digitalRead(pin);
+
+  if (state == HIGH && !alreadyBuzzed) {
     digitalWrite(led, HIGH);
-    digitalWrite(pin_buz, 1);
-  } else {
+    digitalWrite(pin_buz, HIGH);
+    delay(1000);
+    digitalWrite(pin_buz, LOW);
+    alreadyBuzzed = true;  
+  } 
+  else if (state == LOW) {
     digitalWrite(led, LOW);
-    digitalWrite(pin_buz, 0);
+    digitalWrite(pin_buz, LOW);
+    alreadyBuzzed = false;  
   }
+
   analogWrite(pwm, LOW);
   digitalWrite(ain2, LOW);
-  digitalWrite(ain1, LOW);    
+  digitalWrite(ain1, LOW);
 }
 
 void setup() {
@@ -110,11 +124,11 @@ void setup() {
   pinMode(pin, INPUT);
   pinMode(pin_buz, OUTPUT);
   pinMode(led, OUTPUT);
-  pinMode(pwm, OUTPUT); // pwm 
-  pinMode(ain2, OUTPUT); // AIN 2 
-  pinMode(ain1, OUTPUT); // AIN 1
-  pinMode(HC_TRIG, OUTPUT); // HC_TRIG 
-  pinMode(HC_ECHO, INPUT); // HC_ECHO
+  pinMode(pwm, OUTPUT); 
+  pinMode(ain2, OUTPUT); 
+  pinMode(ain1, OUTPUT); 
+  pinMode(HC_TRIG, OUTPUT); 
+  pinMode(HC_ECHO, INPUT); 
   
   Wire.begin();
   Wire.setClock(400000); // use 400 kHz I2C
@@ -140,7 +154,7 @@ void loop() {
   }
 
   if (status == 1){
-    Serial.println("Mode OPTIC");
+     Serial.println("Mode OPTIC");
     getDist();
   }
 
